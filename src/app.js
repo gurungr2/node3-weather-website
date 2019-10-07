@@ -45,11 +45,7 @@ app.get('/help', (req, res) => {
 })
 
 app.get('/weather', (req, res) => {
-    if (!req.query.address) {
-        return res.send({
-            error: "Please provide an address"
-        })
-    }
+     if (!req.query.search) return next("Please Provide an Address");
 
     geocode(req.query.address, (error, {latitude, longitude, location} = {}) => {
         if (error) {
@@ -71,12 +67,9 @@ app.get('/weather', (req, res) => {
     })
 })
 
-app.get('/products', (req, res) => {
-    if (!req.query.search) {
-        return res.send({
-            error: "You must provide a search term"
-        })
-    }
+app.get('/products', (req, res, next) => {
+    if (!req.query.search) return next("You must provide a search term");
+     
     res.send({
         products: []
     })
@@ -97,6 +90,13 @@ app.get('*', (req, res) => {
         errorMessage: 'Page not found'
     })
 })
+
+ app.use((err, req, res, next) => {
+        console.log(err);
+        res.status(400)
+            .send({ success: false, message: err.message || err });
+      }
+    );
 
 app.listen(port, () => {
     console.log('Server is up on port ' + port)
